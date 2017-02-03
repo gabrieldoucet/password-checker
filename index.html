@@ -18,20 +18,59 @@
 </head>
 
 <body>
-  <div class='container'>
-    <div class='container col-lg-3'>
-      <input type=password placeholder='Type in here' onkeyup='check(this)'>
+<div class="container">
+  <div class="form">
+    <div class="form-group">
+      <h3>Proactive password checker</h3>
+      <input class="col-offset-lg-1" type='text' placeholder='Your Password' onkeyup='check(this)'>
     </div>
   </div>
-  <div class='container'>
-    <div class='container col-lg-3'>
-      <input type=password placeholder=''>
-    </div>
-    <div class='container col-lg-3'>
-      <input type=text>
-    </div>
-    <div class='container col-lg-3'>
-      <input type=password placeholder='Type in here'>
+</div>
+
+<div class="container">
+  <div class="container col-lg-4">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">Uppercase</h3>
+      </div>
+      <div class="panel-body" id="uppercase-feedback">
+        Panel content
+      </div>
     </div>
   </div>
+
+  <div class="container col-lg-4">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">Lowercase</h3>
+      </div>
+      <div class="panel-body" id="lowercase-feedback">
+        Panel content
+      </div>
+    </div>
+  </div>
+
+
+  <div class="container col-lg-4">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">Number</h3>
+      </div>
+      <div class="panel-body" id="number-feedback">
+        Panel content
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title">Debug</h3>
+    </div>
+    <div class="panel-body" id="debug">
+
+    </div>
+  </div>
+</div>
 </body>
