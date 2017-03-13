@@ -1,6 +1,6 @@
 angular.module('passwordCheckerApp', [])
   .controller('passwordCheckerController', ['$http', '$scope', '$sce', function($http, $scope, $sce) {
-    var MIN_DIGITS_COUNT = 2;
+    var MIN_DIGITS_COUNT = 1;
     var MIN_UPPERCASE_COUNT = 2;
     var MIN_LOWERCASE_COUNT = 2;
     var oldDigitState = 'NOK';
@@ -12,7 +12,7 @@ angular.module('passwordCheckerApp', [])
 
     $scope.dictionnary = {};
     $scope.passwordSuggestions = [];
-    $scope.words = {}
+    $scope.words = {word1: '', word2: ''};
     $scope.result = {remarks: ''};
     $scope.showHelper = false;
 
@@ -116,47 +116,52 @@ angular.module('passwordCheckerApp', [])
     };
 
     var checkAndSuggest = function(words) {
+
+      // Handle empty words cases
+      if (_.isEqual(words[0], '')) {
+        var _newWord1 = words[1].substring(0, words[1].length - 1);
+        words[0] = _newWord1;
+        $scope.words.word1 = _newWord1;
+      }
+      if (_.isEqual(words[1], '')) {
+        var _newWord2 = words[0].substring(0, words[0].length - 1);
+        words[1] = _newWord2;
+        $scope.words.word2 = _newWord2;
+      }
+
       words = _.map(words, function (word) {
         return _.upperFirst(word);
       });
+
       var password = words.join(' ');
       var score = zxcvbn(password).score;
       var newWords = [];
       $scope.result.zxcvbn = zxcvbn(password);
 
-      if (words.length == 2) {
-        if (score <= 2) {
+      if (score <= 2) {
 
-        // If the first word is not long enough, find a longer word
-        if ($scope.words.word1.length <= 4) {
-          var newWord1 = wordSuggestions($scope.words.word1);
-          newWords.push(newWord1);
-        } else {
-          newWords.push($scope.words.word1);
-        }
-
-        // If the second word is not long enough, find a longer word
-        if ($scope.words.word2.length <= 4) {
-          var newWord2 = wordSuggestions($scope.words.word2);
-          newWords.push(newWord2);
-        } else {
-          newWords.push($scope.words.word2);
-        }
-
-        var randomNumber = Math.floor(Math.random() * 9);
-        //newWords.push(randomNumber.toString());
-        // Create the new password and recompute the score
-        return checkAndSuggest(newWords);
-        } else {
-          return password;
-        }
+      // If the first word is not long enough, find a longer word
+      if ($scope.words.word1.length <= 4) {
+        var newWord1 = wordSuggestions($scope.words.word1);
+        newWords.push(newWord1);
       } else {
-        if (_.isEqual($scope.words.word1, '')) {
+        newWords.push($scope.words.word1);
+      }
 
-        }
-        if (_.isEqual($scope.words.word1, '')) {
+      // If the second word is not long enough, find a longer word
+      if ($scope.words.word2.length <= 4) {
+        var newWord2 = wordSuggestions($scope.words.word2);
+        newWords.push(newWord2);
+      } else {
+        newWords.push($scope.words.word2);
+      }
 
-        }
+      var randomNumber = Math.floor(Math.random() * 9);
+      //newWords.push(randomNumber.toString());
+      // Create the new password and recompute the score
+      return checkAndSuggest(newWords);
+      } else {
+        return password;
       }
     };
 
@@ -218,6 +223,6 @@ angular.module('passwordCheckerApp', [])
     };
 
     $scope.triggerHelper =function () {
-      $scope.showHelper = !$scope.showHelper;
+      $scope.showHelper = true;
     }
   }]);
