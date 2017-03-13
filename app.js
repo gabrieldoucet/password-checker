@@ -1,9 +1,8 @@
 angular.module('passwordCheckerApp', [])
   .controller('passwordCheckerController', ['$http', '$scope', '$sce', function($http, $scope, $sce) {
-    var MIN_DIGITS_COUNT = 4;
-    var MIN_UPPERCASE_COUNT = 4;
-    var MIN_LOWERCASE_COUNT = 4;
-    var uppercaseReq = false;
+    var MIN_DIGITS_COUNT = 2;
+    var MIN_UPPERCASE_COUNT = 2;
+    var MIN_LOWERCASE_COUNT = 2;
     var oldDigitState = 'NOK';
     var digitState = 'NOK';
     var oldUppercaseState = 'NOK';
@@ -14,7 +13,8 @@ angular.module('passwordCheckerApp', [])
     $scope.dictionnary = {};
     $scope.passwordSuggestions = [];
     $scope.words = {}
-    $scope.result = {};
+    $scope.result = {remarks: ''};
+    $scope.showHelper = false;
 
     // Loading the dictionnary for password suggestion
     $http({method: 'GET', url: 'https://gdoucet-fr.github.io/passwordChecker/dictionnary.json'})
@@ -24,49 +24,9 @@ angular.module('passwordCheckerApp', [])
       // Rejected promise
       function() { 
         $scope.dictionnary = _dictionnary;
-        console.log("promesse rompue");
       });
 
-    $scope.check = function(element) {
-      var regex = new RegExp('[a-zA-Z]+[0-9][0-9]');
-
-      var password = element.value;
-
-      console.log(password.match(digitRegex));
-
-      var digitRegex = /\d/g;
-      var digitCount = _.isNull(password.match(digitRegex)) ? 0 : password.match(digitRegex).length ;
-      oldDigitState = digitState;
-      if (digitCount >= MIN_DIGITS_COUNT) {
-        digitState = 'OK';
-      } else {
-        digitState = 'NOK';
-      }
-
-      var uppercaseRegex = /[A-Z]/g;
-      var uppercaseCount = _.isNull(password.match(uppercaseRegex)) ? 0 : password.match(uppercaseRegex).length ;
-      oldUppercaseState = uppercaseState;
-      if (uppercaseCount >= MIN_UPPERCASE_COUNT) {
-        uppercaseState = 'OK';
-      } else {
-        uppercaseState = 'NOK';
-      }
-
-      var lowercaseRegex = /[a-z]/g;
-      var lowercaseCount = _.isNull(password.match(lowercaseRegex)) ? 0 : password.match(lowercaseRegex).length ;
-      oldLowercaseState = lowercaseState;
-      if (lowercaseCount >= MIN_LOWERCASE_COUNT) {
-        lowercaseState = 'OK';
-      } else {
-        lowercaseState = 'NOK';
-      }
-
-      $scope.numberFeedback();
-      $scope.lowercaseFeedback();
-      $scope.uppercaseFeedback();
-    }
-
-    $scope.numberFeedback = function() {
+    var numberFeedback = function() {
       var numberFeedbackDiv = document.getElementById('number-feedback');
       if (!_.isEqual(oldDigitState, digitState)) {
         // Remove the existing glyphicon
@@ -85,7 +45,7 @@ angular.module('passwordCheckerApp', [])
       }
     }
 
-    $scope.uppercaseFeedback = function() {
+    var uppercaseFeedback = function() {
       var uppercaseFeedbackDiv = document.getElementById('uppercase-feedback');
       if (!_.isEqual(oldUppercaseState, uppercaseState)) {
         // Remove the existing glyphicon
@@ -104,7 +64,7 @@ angular.module('passwordCheckerApp', [])
       }
     }
 
-    $scope.lowercaseFeedback = function() {
+    var lowercaseFeedback = function() {
       var lowercaseFeedbackDiv = document.getElementById('lowercase-feedback');
       if (!_.isEqual(oldLowercaseState, lowercaseState)) {
         // Remove the existing glyphicon
@@ -123,7 +83,7 @@ angular.module('passwordCheckerApp', [])
       }
     }
 
-    $scope.debugFeedback = function (score) {
+    var debugFeedback = function (score) {
       var progressbarScore = document.getElementById('progressbar-force');
       progressbarScore.setAttribute('aria-valuenow', 20 * (score + 1));
 
@@ -163,9 +123,9 @@ angular.module('passwordCheckerApp', [])
       var score = zxcvbn(password).score;
       var newWords = [];
       $scope.result.zxcvbn = zxcvbn(password);
-      $scope.debugFeedback(score);
 
-      if (score <= 2) {
+      if (words.length == 2) {
+        if (score <= 2) {
 
         // If the first word is not long enough, find a longer word
         if ($scope.words.word1.length <= 4) {
@@ -187,9 +147,63 @@ angular.module('passwordCheckerApp', [])
         //newWords.push(randomNumber.toString());
         // Create the new password and recompute the score
         return checkAndSuggest(newWords);
+        } else {
+          return password;
+        }
       } else {
-        return password;
+        if (_.isEqual($scope.words.word1, '')) {
+
+        }
+        if (_.isEqual($scope.words.word1, '')) {
+
+        }
       }
+    };
+
+    $scope.checkPassword = function() {
+
+      var password = $scope.passwordTest;
+      var result =  zxcvbn(password);
+      var score = result.score;
+      $scope.result.zxcvbn = result;
+      debugFeedback(score);
+
+      if (result.feedback.warning.indexOf('common') !== -1) {
+        $scope.result.remarks = 'Commonly used';
+      } else {
+        $scope.result.remarks = '';
+      }
+
+      var digitRegex = /\d/g;
+      var digitCount = _.isNull(password.match(digitRegex)) ? 0 : password.match(digitRegex).length ;
+      oldDigitState = digitState;
+      if (digitCount >= MIN_DIGITS_COUNT) {
+        digitState = 'OK';
+      } else {
+        digitState = 'NOK';
+      }
+
+      var uppercaseRegex = /[A-Z]/g;
+      var uppercaseCount = _.isNull(password.match(uppercaseRegex)) ? 0 : password.match(uppercaseRegex).length ;
+      oldUppercaseState = uppercaseState;
+      if (uppercaseCount >= MIN_UPPERCASE_COUNT) {
+        uppercaseState = 'OK';
+      } else {
+        uppercaseState = 'NOK';
+      }
+
+      var lowercaseRegex = /[a-z]/g;
+      var lowercaseCount = _.isNull(password.match(lowercaseRegex)) ? 0 : password.match(lowercaseRegex).length ;
+      oldLowercaseState = lowercaseState;
+      if (lowercaseCount >= MIN_LOWERCASE_COUNT) {
+        lowercaseState = 'OK';
+      } else {
+        lowercaseState = 'NOK';
+      }
+
+      numberFeedback();
+      lowercaseFeedback();
+      uppercaseFeedback();
     };
 
     $scope.createPassword = function () {
@@ -201,5 +215,9 @@ angular.module('passwordCheckerApp', [])
       $scope.result.finalPassword = $sce.trustAsHtml(finalPassword.replace(/\s/g, '&#9251'));
 
 //      console.log($scope.passwordSuggestions);
+    };
+
+    $scope.triggerHelper =function () {
+      $scope.showHelper = !$scope.showHelper;
     }
   }]);
